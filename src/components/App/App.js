@@ -1,4 +1,5 @@
 import React from 'react'
+import { nanoid } from 'nanoid'
 
 import Header from '../Header'
 import TaskList from '../TaskList'
@@ -30,13 +31,18 @@ export default class App extends React.Component {
     return newArr
   }
 
-  maxId = 100
+  static createNewTask = (taskName) => ({
+    id: nanoid(3),
+    taskName,
+    done: false,
+    date: new Date(),
+  })
 
   state = {
     data: [
-      { id: 1, taskName: 'First Task', done: false, date: new Date() },
-      { id: 2, taskName: 'Second Task', done: false, date: new Date() },
-      { id: 3, taskName: 'Third Task', done: false, date: new Date() },
+      { id: nanoid(3), taskName: 'First Task', done: false, date: new Date() },
+      { id: nanoid(3), taskName: 'Second Task', done: false, date: new Date() },
+      { id: nanoid(3), taskName: 'Third Task', done: false, date: new Date() },
     ],
     filter: 'all',
   }
@@ -51,7 +57,7 @@ export default class App extends React.Component {
     const { data } = this.state
     const newArr = [...data]
 
-    newArr.push(this.createNewTask(taskName))
+    newArr.push(App.createNewTask(taskName))
     this.setState({
       data: newArr,
     })
@@ -65,20 +71,9 @@ export default class App extends React.Component {
     })
   }
 
-  createNewTask = (taskName) => {
-    this.maxId += 1
-
-    return {
-      id: this.maxId,
-      taskName,
-      done: false,
-      date: new Date(),
-    }
-  }
-
-  changeFilter = (filter) => {
+  changeFilter = (e) => {
     this.setState({
-      filter,
+      filter: e.target.value,
     })
   }
 
