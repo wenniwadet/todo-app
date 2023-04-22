@@ -38,10 +38,19 @@ export default class Task extends React.Component {
   acceptTaskName = (e) => {
     const { taskName } = this.state
     const { id, onChangeTaskName } = this.props
+    const validTaskName = taskName
+      .split(' ')
+      .filter((sub) => sub !== '')
+      .join(' ')
 
     e.preventDefault()
-    onChangeTaskName(id, taskName)
 
+    if (validTaskName === '') {
+      alert('Наименование задачи не может быть пустым')
+      return
+    }
+
+    onChangeTaskName(id, validTaskName)
     this.toggleStateEditing()
   }
 
@@ -79,7 +88,7 @@ export default class Task extends React.Component {
 }
 
 Task.propTypes = {
-  id: PropTypes.number.isRequired,
+  id: PropTypes.string.isRequired,
   taskName: PropTypes.string.isRequired,
   done: PropTypes.bool.isRequired,
   date: PropTypes.instanceOf(Date).isRequired,

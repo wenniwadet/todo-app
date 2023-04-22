@@ -15,10 +15,20 @@ export default class NewTaskForm extends React.Component {
   acceptNameNewTask = (e) => {
     const { onAddedTask } = this.props
     const { taskName } = this.state
+    const validTaskName = taskName
+      .split(' ')
+      .filter((sub) => sub !== '')
+      .join(' ')
 
     e.preventDefault()
-    onAddedTask(taskName)
 
+    if (validTaskName === '') {
+      alert('Наименование задачи не может быть пустым')
+      this.setState({ taskName: '' })
+      return
+    }
+
+    onAddedTask(validTaskName)
     this.setState({ taskName: '' })
   }
 
