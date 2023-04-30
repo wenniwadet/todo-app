@@ -62,7 +62,7 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    document.addEventListener('click', ({ target }) => {
+    document.addEventListener('mousedown', ({ target }) => {
       if (!target.matches('.edit')) {
         this.cancelEditing()
       }
