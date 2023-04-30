@@ -1,0 +1,29 @@
+.todo-list li .icon {
+  width: 30px;
+  height: 40px;
+  font-size: 34px;
+  color: #cc9a9a;
+  margin: auto 0;
+  transition: color 0.2s ease-out;
+  cursor: pointer;
+}
+
+.todo-list li .icon:hover {
+  color: #af5b5e;
+}
+
+.button-timer {
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.button-timer:hover {
+  box-shadow: 0 0 5px 0 black;
+}
+
+.button-timer img {
+  display: block;
+  width: 30px;
+  height: 30px;
+}

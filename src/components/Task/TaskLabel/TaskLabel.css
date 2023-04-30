@@ -1,4 +1,4 @@
-.toggle-all + label {
+.toggle-all + .label {
   width: 60px;
   height: 34px;
   font-size: 0;
@@ -9,18 +9,18 @@
   transform: rotate(90deg);
 }
 
-.toggle-all + label:before {
+.toggle-all + .label:before {
   content: '❯';
   font-size: 22px;
   color: #e6e6e6;
   padding: 10px 27px 10px 27px;
 }
 
-.toggle-all:checked + label:before {
+.toggle-all:checked + .label:before {
   color: #737373;
 }
 
-label {
+.label {
   /*
 		Firefox requires `#` to be escaped - https://bugzilla.mozilla.org/show_bug.cgi?id=922433
 		IE and Edge requires *everything* to be escaped to render, so we do that instead of just the `#` - https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/7157459/
@@ -30,29 +30,34 @@ label {
   background-position: center left;
 }
 
-label {
+.label {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 15px 85px 15px 60px;
 }
 
-.toggle:checked + label {
+.toggle:checked + .label {
   background-image: url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23bddad5%22%20stroke-width%3D%223%22/%3E%3Cpath%20fill%3D%22%235dc2af%22%20d%3D%22M72%2025L42%2071%2027%2056l-4%204%2020%2020%2034-52z%22/%3E%3C/svg%3E');
 }
 
-.toggle-all + label:before {
+.toggle-all + .label:before {
   content: '❯';
   font-size: 22px;
   color: #e6e6e6;
   padding: 10px 27px 10px 27px;
 }
 
-.toggle-all:checked + label:before {
+.toggle-all:checked + .label:before {
   color: #737373;
 }
 
-.description {
+.todo-list li .label .description {
+  font-size: 13px;
+  color: gray;
+}
+
+.todo-list li .label .title {
   word-break: break-all;
   display: block;
   line-height: 1.2;
@@ -61,12 +66,13 @@ label {
   color: #4d4d4d;
 }
 
-.completed .description {
+.todo-list li.completed .label .title {
   color: #cdcdcd;
   text-decoration: line-through;
 }
 
-.created {
-  font-size: 13px;
-  color: gray;
+.description {
+  display: flex;
+  align-items: center;
+  column-gap: 5px;
 }

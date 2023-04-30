@@ -3,60 +3,69 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 import PropTypes from 'prop-types'
 
 import TaskLabel from './TaskLabel'
-import TaskButtons from './TaskButtons'
 
 import './Task.css'
 
 export default class Task extends React.Component {
+  static validateTextTask(str) {
+    return str
+      .split(' ')
+      .filter((sub) => sub !== '')
+      .join(' ')
+  }
+
+  dateCreatedId = null
+
   state = {
-    taskName: this.props.taskName,
-    editing: false,
     distanceToNow: formatDistanceToNow(this.props.date),
   }
 
   componentDidMount() {
     const { updateTime, date } = this.props
-    this.timerId = setInterval(() => {
+
+    this.dateCreatedId = setInterval(() => {
       this.setState({ distanceToNow: formatDistanceToNow(date) })
     }, updateTime)
   }
 
   componentWillUnmount() {
-    clearInterval(this.timerId)
+    clearInterval(this.dateCreatedId)
   }
 
-  changeTaskName = (e) => {
-    this.setState({ taskName: e.target.value })
-  }
+  changeText = (e) => {
+    // e.preventDefault()
 
-  toggleStateEditing = () => {
-    this.setState(({ editing }) => ({
-      editing: !editing,
-    }))
-  }
+    const { id, onChangeText } = this.props
+    const validTextTask = Task.validateTextTask(e.target.value)
 
-  acceptTaskName = (e) => {
-    const { taskName } = this.state
-    const { id, onChangeTaskName } = this.props
-    const validTaskName = taskName
-      .split(' ')
-      .filter((sub) => sub !== '')
-      .join(' ')
-
-    e.preventDefault()
-
-    if (validTaskName === '') {
+    if (validTextTask === '') {
       alert('Наименование задачи не может быть пустым')
       return
     }
 
-    onChangeTaskName(id, validTaskName)
-    this.toggleStateEditing()
+    onChangeText(id, validTextTask)
+  }
+
+  acceptText = (e) => {
+    e.preventDefault()
+
+    const { id, onEdit } = this.props
+    onEdit(id)
+  }
+
+  onStartTimer = () => {
+    const { id, onStartTimer } = this.props
+    onStartTimer(id)
+  }
+
+  onPauseTimer = () => {
+    const { id, onPauseTimer } = this.props
+    onPauseTimer(id)
   }
 
   render() {
-    const { id, done, onDone, onDelete } = this.props
-    const { editing, distanceToNow, taskName } = this.state
+    const { id, textTask, done, editing, timer, timerRun, onDone, onEdit, onDelete } = this.props
+    const { distanceToNow } = this.state
 
     let statusTask = null
 
@@ -69,17 +78,25 @@ export default class Task extends React.Component {
     }
 
     const inputEditor = editing && (
-      <form onSubmit={this.acceptTaskName}>
-        <input className="edit" type="text" onChange={this.changeTaskName} value={taskName} />
+      <form onSubmit={this.acceptText}>
+        <input className="edit" type="text" onChange={this.changeText} value={textTask} maxLength={7} />
       </form>
     )
 
     return (
       <li className={statusTask}>
         <div className="view">
-          <input className="toggle" type="checkbox" onClick={() => onDone(id)} defaultChecked={!!done} />
-          <TaskLabel taskName={taskName} distanceToNow={distanceToNow} />
-          <TaskButtons onDelete={() => onDelete(id)} onEdit={this.toggleStateEditing} />
+          <input className="toggle" type="checkbox" onClick={() => onDone(id)} defaultChecked={done} />
+          <TaskLabel
+            textTask={textTask}
+            distanceToNow={distanceToNow}
+            timer={timer}
+            timerRun={timerRun}
+            onStartTimer={this.onStartTimer}
+            onPauseTimer={this.onPauseTimer}
+          />
+          <button className="icon icon-edit" type="button" aria-label="edit" onClick={() => onEdit(id)} />
+          <button className="icon icon-destroy" type="button" aria-label="delete" onClick={() => onDelete(id)} />
         </div>
         {inputEditor}
       </li>
@@ -87,17 +104,23 @@ export default class Task extends React.Component {
   }
 }
 
-Task.propTypes = {
-  id: PropTypes.string.isRequired,
-  taskName: PropTypes.string.isRequired,
-  done: PropTypes.bool.isRequired,
-  date: PropTypes.instanceOf(Date).isRequired,
-  onDone: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
-  onChangeTaskName: PropTypes.func.isRequired,
-  updateTime: PropTypes.number,
-}
-
 Task.defaultProps = {
   updateTime: 60000,
+}
+
+Task.propTypes = {
+  id: PropTypes.string.isRequired,
+  textTask: PropTypes.string.isRequired,
+  done: PropTypes.bool.isRequired,
+  editing: PropTypes.bool.isRequired,
+  date: PropTypes.instanceOf(Date).isRequired,
+  updateTime: PropTypes.number,
+  timer: PropTypes.number.isRequired,
+  timerRun: PropTypes.bool.isRequired,
+  onDone: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onChangeText: PropTypes.func.isRequired,
+  onStartTimer: PropTypes.func.isRequired,
+  onPauseTimer: PropTypes.func.isRequired,
 }

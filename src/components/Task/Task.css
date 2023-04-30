@@ -53,6 +53,29 @@
   opacity: 0;
 }
 
+.todo-list li .icon-destroy {
+  position: absolute;
+  top: 0;
+  bottom: -3px;
+  right: 10px;
+}
+
+.todo-list li .icon-destroy:after {
+  content: '×';
+}
+
+.todo-list li .icon-edit {
+  position: absolute;
+  top: 0;
+  bottom: -3px;
+  font-size: 19px;
+  right: 45px;
+}
+
+.todo-list li .icon-edit:after {
+  content: '✎';
+}
+
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   .toggle-all,
   .toggle {
