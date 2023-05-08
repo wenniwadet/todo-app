@@ -41,12 +41,15 @@ function Timer({ timer, timerRun, onPauseTimer, onStartTimer }) {
 
   return (
     <div className="description">
-      <button className="button-timer" type="button" aria-label="start timer" onClick={onClickStart}>
-        <img src={play} alt="start timer" />
-      </button>
-      <button className="button-timer" type="button" aria-label="stop timer" onClick={onClickPause}>
-        <img src={pause} alt="pause timer" />
-      </button>
+      {timerRun ? (
+        <button className="button-timer" type="button" aria-label="stop timer" onClick={onClickPause}>
+          <img src={pause} alt="pause timer" />
+        </button>
+      ) : (
+        <button className="button-timer" type="button" aria-label="start timer" onClick={onClickStart}>
+          <img src={play} alt="start timer" />
+        </button>
+      )}
       <Countdown date={Date.now() + timer} renderer={renderer} autoStart={timerRun} ref={setRef} />
     </div>
   )

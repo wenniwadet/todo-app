@@ -1,19 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 
 import NewTaskForm from '../NewTaskForm'
 
 import './Header.css'
 
-export default class Header extends React.Component {
-  static validateTextTask(text) {
-    return text
+export default function Header({ onAddedTask }) {
+  const validateTextTask = (text) =>
+    text
       .split(' ')
       .filter((sub) => sub !== '')
       .join(' ')
-  }
 
-  static validTimer(str) {
+  const validTimer = (str) => {
     let result = true
 
     str.split('').forEach((el) => {
@@ -25,64 +24,59 @@ export default class Header extends React.Component {
     return result
   }
 
-  state = {
-    textTask: '',
-    min: '',
-    sec: '',
+  const [textTask, setTextTask] = useState('')
+  const [min, setMin] = useState('')
+  const [sec, setSec] = useState('')
+
+  const changeText = ({ target }) => {
+    setTextTask(target.value)
   }
 
-  changeText = ({ target }) => {
-    this.setState({ textTask: target.value })
-  }
-
-  changeTimerMin = ({ target }) => {
-    if (Header.validTimer(target.value)) {
-      this.setState({ min: target.value })
+  const changeTimerMin = ({ target }) => {
+    if (validTimer(target.value)) {
+      setMin(target.value)
     }
   }
 
-  changeTimerSec = ({ target }) => {
-    if (Header.validTimer(target.value)) {
-      this.setState({ sec: target.value })
+  const changeTimerSec = ({ target }) => {
+    if (validTimer(target.value)) {
+      setSec(target.value)
     }
   }
 
-  acceptNewTask = (e) => {
+  const acceptNewTask = (e) => {
     e.preventDefault()
 
-    const { onAddedTask } = this.props
-    const { textTask, min, sec } = this.state
     const timer = (Number(min) * 60 + Number(sec)) * 1000
-    const validTextTask = Header.validateTextTask(textTask)
+    const validTextTask = validateTextTask(textTask)
 
     if (validTextTask === '') {
       alert('Наименование задачи не может быть пустым')
-      this.setState({ textTask: '' })
+      setTextTask('')
       return
     }
 
     onAddedTask(validTextTask, timer)
-    this.setState({ textTask: '', min: '', sec: '' })
+    setTextTask('')
+    setMin('')
+    setSec('')
   }
 
-  render() {
-    const { textTask, min, sec } = this.state
-    const timer = [min, sec]
+  const timer = [min, sec]
 
-    return (
-      <header className="header">
-        <h1>todos</h1>
-        <NewTaskForm
-          textTask={textTask}
-          timer={timer}
-          onChangeText={this.changeText}
-          onChangeTimerMin={this.changeTimerMin}
-          onChangeTimerSec={this.changeTimerSec}
-          onAcceptTask={this.acceptNewTask}
-        />
-      </header>
-    )
-  }
+  return (
+    <header className="header">
+      <h1>todos</h1>
+      <NewTaskForm
+        textTask={textTask}
+        timer={timer}
+        onChangeText={changeText}
+        onChangeTimerMin={changeTimerMin}
+        onChangeTimerSec={changeTimerSec}
+        onAcceptTask={acceptNewTask}
+      />
+    </header>
+  )
 }
 
 Header.propTypes = {

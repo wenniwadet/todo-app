@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 import PropTypes from 'prop-types'
 
@@ -6,37 +6,45 @@ import TaskLabel from './TaskLabel'
 
 import './Task.css'
 
-export default class Task extends React.Component {
-  static validateTextTask(str) {
-    return str
+function Task({
+  id,
+  textTask,
+  done,
+  editing,
+  date,
+  timer,
+  timerRun,
+  onDone,
+  onEdit,
+  onDelete,
+  onChangeText,
+  onStartTimer,
+  onPauseTimer,
+}) {
+  const validateTextTask = (str) =>
+    str
       .split(' ')
       .filter((sub) => sub !== '')
       .join(' ')
-  }
 
-  dateCreatedId = null
+  const dateIntervalId = useRef()
 
-  state = {
-    distanceToNow: formatDistanceToNow(this.props.date),
-  }
+  const [distanceToNow, setDistanceToNow] = useState(formatDistanceToNow(date))
 
-  componentDidMount() {
-    const { updateTime, date } = this.props
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setDistanceToNow(formatDistanceToNow(date))
+    }, 60000)
 
-    this.dateCreatedId = setInterval(() => {
-      this.setState({ distanceToNow: formatDistanceToNow(date) })
-    }, updateTime)
-  }
+    dateIntervalId.current = intervalId
 
-  componentWillUnmount() {
-    clearInterval(this.dateCreatedId)
-  }
+    return () => {
+      clearInterval(dateIntervalId.current)
+    }
+  }, [date])
 
-  changeText = (e) => {
-    // e.preventDefault()
-
-    const { id, onChangeText } = this.props
-    const validTextTask = Task.validateTextTask(e.target.value)
+  const changeText = (e) => {
+    const validTextTask = validateTextTask(e.target.value)
 
     if (validTextTask === '') {
       alert('Наименование задачи не может быть пустым')
@@ -46,66 +54,53 @@ export default class Task extends React.Component {
     onChangeText(id, validTextTask)
   }
 
-  acceptText = (e) => {
+  const acceptText = (e) => {
     e.preventDefault()
-
-    const { id, onEdit } = this.props
     onEdit(id)
   }
 
-  onStartTimer = () => {
-    const { id, onStartTimer } = this.props
+  const startTimer = () => {
     onStartTimer(id)
   }
 
-  onPauseTimer = () => {
-    const { id, onPauseTimer } = this.props
+  const pauseTimer = () => {
     onPauseTimer(id)
   }
 
-  render() {
-    const { id, textTask, done, editing, timer, timerRun, onDone, onEdit, onDelete } = this.props
-    const { distanceToNow } = this.state
+  let statusTask = null
 
-    let statusTask = null
-
-    if (done) {
-      statusTask = 'completed'
-    }
-
-    if (editing) {
-      statusTask = 'editing'
-    }
-
-    const inputEditor = editing && (
-      <form onSubmit={this.acceptText}>
-        <input className="edit" type="text" onChange={this.changeText} value={textTask} maxLength={7} />
-      </form>
-    )
-
-    return (
-      <li className={statusTask}>
-        <div className="view">
-          <input className="toggle" type="checkbox" onClick={() => onDone(id)} defaultChecked={done} />
-          <TaskLabel
-            textTask={textTask}
-            distanceToNow={distanceToNow}
-            timer={timer}
-            timerRun={timerRun}
-            onStartTimer={this.onStartTimer}
-            onPauseTimer={this.onPauseTimer}
-          />
-          <button className="icon icon-edit" type="button" aria-label="edit" onClick={() => onEdit(id)} />
-          <button className="icon icon-destroy" type="button" aria-label="delete" onClick={() => onDelete(id)} />
-        </div>
-        {inputEditor}
-      </li>
-    )
+  if (done) {
+    statusTask = 'completed'
   }
-}
 
-Task.defaultProps = {
-  updateTime: 60000,
+  if (editing) {
+    statusTask = 'editing'
+  }
+
+  const inputEditor = editing && (
+    <form onSubmit={acceptText}>
+      <input className="edit" type="text" onChange={changeText} value={textTask} maxLength={7} />
+    </form>
+  )
+
+  return (
+    <li className={statusTask}>
+      <div className="view">
+        <input className="toggle" type="checkbox" onClick={() => onDone(id)} defaultChecked={done} />
+        <TaskLabel
+          textTask={textTask}
+          distanceToNow={distanceToNow}
+          timer={timer}
+          timerRun={timerRun}
+          onStartTimer={startTimer}
+          onPauseTimer={pauseTimer}
+        />
+        <button className="icon icon-edit" type="button" aria-label="edit" onClick={() => onEdit(id)} />
+        <button className="icon icon-destroy" type="button" aria-label="delete" onClick={() => onDelete(id)} />
+      </div>
+      {inputEditor}
+    </li>
+  )
 }
 
 Task.propTypes = {
@@ -114,7 +109,6 @@ Task.propTypes = {
   done: PropTypes.bool.isRequired,
   editing: PropTypes.bool.isRequired,
   date: PropTypes.instanceOf(Date).isRequired,
-  updateTime: PropTypes.number,
   timer: PropTypes.number.isRequired,
   timerRun: PropTypes.bool.isRequired,
   onDone: PropTypes.func.isRequired,
@@ -124,3 +118,103 @@ Task.propTypes = {
   onStartTimer: PropTypes.func.isRequired,
   onPauseTimer: PropTypes.func.isRequired,
 }
+
+export default Task
+
+// export default class Task extends React.Component {
+// static validateTextTask(str) {
+//   return str
+//     .split(' ')
+//     .filter((sub) => sub !== '')
+//     .join(' ')
+// }
+
+// dateCreatedId = null
+
+// state = {
+//   distanceToNow: formatDistanceToNow(this.props.date),
+// }
+
+// componentDidMount() {
+//   const { updateTime, date } = this.props
+
+//   this.dateCreatedId = setInterval(() => {
+//     this.setState({ distanceToNow: formatDistanceToNow(date) })
+//   }, updateTime)
+// }
+
+// componentWillUnmount() {
+//   clearInterval(this.dateCreatedId)
+// }
+
+// changeText = (e) => {
+//   // e.preventDefault()
+
+//   const { id, onChangeText } = this.props
+//   const validTextTask = Task.validateTextTask(e.target.value)
+
+//   if (validTextTask === '') {
+//     alert('Наименование задачи не может быть пустым')
+//     return
+//   }
+
+//   onChangeText(id, validTextTask)
+// }
+
+// acceptText = (e) => {
+//   e.preventDefault()
+
+//   const { id, onEdit } = this.props
+//   onEdit(id)
+// }
+
+// onStartTimer = () => {
+//   const { id, onStartTimer } = this.props
+//   onStartTimer(id)
+// }
+
+// onPauseTimer = () => {
+//   const { id, onPauseTimer } = this.props
+//   onPauseTimer(id)
+// }
+
+// render() {
+// const { id, textTask, done, editing, timer, timerRun, onDone, onEdit, onDelete } = this.props
+// const { distanceToNow } = this.state
+
+// let statusTask = null
+
+// if (done) {
+//   statusTask = 'completed'
+// }
+
+// if (editing) {
+//   statusTask = 'editing'
+// }
+
+//     const inputEditor = editing && (
+//       <form onSubmit={this.acceptText}>
+//         <input className="edit" type="text" onChange={this.changeText} value={textTask} maxLength={7} />
+//       </form>
+//     )
+
+//     return (
+//       <li className={statusTask}>
+//         <div className="view">
+//           <input className="toggle" type="checkbox" onClick={() => onDone(id)} defaultChecked={done} />
+//           <TaskLabel
+//             textTask={textTask}
+//             distanceToNow={distanceToNow}
+//             timer={timer}
+//             timerRun={timerRun}
+//             onStartTimer={this.onStartTimer}
+//             onPauseTimer={this.onPauseTimer}
+//           />
+//           <button className="icon icon-edit" type="button" aria-label="edit" onClick={() => onEdit(id)} />
+//           <button className="icon icon-destroy" type="button" aria-label="delete" onClick={() => onDelete(id)} />
+//         </div>
+//         {inputEditor}
+//       </li>
+//     )
+//   }
+// }

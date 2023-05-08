@@ -1,4 +1,0 @@
-let sa
-sdad = () => {
-  sd
-}

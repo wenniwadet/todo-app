@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { nanoid } from 'nanoid'
 
 import Header from '../Header'
@@ -7,8 +7,8 @@ import Footer from '../Footer'
 
 import './App.css'
 
-export default class App extends React.Component {
-  static filteringData = (arr, filter) => {
+export default function App() {
+  function filteringData(arr, filter) {
     switch (filter) {
       case 'all':
         return arr
@@ -21,7 +21,7 @@ export default class App extends React.Component {
     }
   }
 
-  static findTask(arr, id) {
+  function findTask(arr, id) {
     const idx = arr.findIndex((el) => el.id === id)
     const oldItem = arr[idx]
     const newArr = [...arr]
@@ -33,157 +33,41 @@ export default class App extends React.Component {
     }
   }
 
-  static toggleProperty = (arr, id, propName) => {
-    const { newArr, idx, oldItem } = App.findTask(arr, id)
-    const newItem = { ...oldItem, [propName]: !oldItem[propName] }
+  function toggleProperty(arr, id, propName) {
+    const { newArr, idx, oldItem } = findTask(arr, id)
+
+    const newItem =
+      propName === 'done'
+        ? { ...oldItem, [propName]: !oldItem[propName], timer: 0 }
+        : { ...oldItem, [propName]: !oldItem[propName] }
 
     newArr.splice(idx, 1, newItem)
-
     return newArr
   }
 
-  static createNewTask = (textTask, timer) => ({
-    id: nanoid(3),
-    textTask,
-    done: false,
-    editing: false,
-    date: new Date(),
-    timer,
-    timerRun: false,
-  })
-
-  state = {
-    data: [
-      { id: nanoid(3), textTask: '1', done: false, editing: false, date: new Date(), timer: 100000, timerRun: false },
-      { id: nanoid(3), textTask: '2', done: false, editing: false, date: new Date(), timer: 100000, timerRun: false },
-      { id: nanoid(3), textTask: '3', done: false, editing: false, date: new Date(), timer: 100000, timerRun: false },
-    ],
-    filter: 'all',
+  function createNewTask(textTask, timer) {
+    return {
+      id: nanoid(3),
+      textTask,
+      done: false,
+      editing: false,
+      date: new Date(),
+      timer,
+      timerRun: false,
+    }
   }
 
-  componentDidMount() {
-    document.addEventListener('mousedown', ({ target }) => {
-      if (!target.matches('.edit')) {
-        this.cancelEditing()
-      }
-    })
+  const [data, setData] = useState([
+    { id: nanoid(3), textTask: '1', done: false, editing: false, date: new Date(), timer: 100000, timerRun: false },
+    { id: nanoid(3), textTask: '2', done: false, editing: false, date: new Date(), timer: 100000, timerRun: false },
+    { id: nanoid(3), textTask: '3', done: false, editing: false, date: new Date(), timer: 100000, timerRun: false },
+  ])
 
-    document.addEventListener('keydown', ({ key }) => {
-      if (key === 'Escape') {
-        this.cancelEditing()
-      }
-    })
-  }
+  const [filter, setFilter] = useState('all')
 
-  startTimer = (id) => {
-    this.setState(({ data }) => {
-      const { newArr, idx, oldItem } = App.findTask(data, id)
-      const timerId = setInterval(() => {
-        this.updateTimer(id)
-      }, 1000)
-      const newItem = { ...oldItem, timerRun: true, timerId }
-
-      newArr.splice(idx, 1, newItem)
-      return {
-        data: newArr,
-      }
-    })
-  }
-
-  pauseTimer = (id) => {
-    this.setState(({ data }) => {
-      const { newArr, idx, oldItem } = App.findTask(data, id)
-      const newItem = { ...oldItem, timerRun: false }
-
-      clearInterval(oldItem.timerId)
-      newArr.splice(idx, 1, newItem)
-
-      return {
-        data: newArr,
-      }
-    })
-  }
-
-  togglePropertyDone = (id) => {
-    this.setState(({ data }) => ({
-      data: App.toggleProperty(data, id, 'done'),
-    }))
-  }
-
-  togglePropertyEditing = (id) => {
-    this.setState(({ data }) => ({
-      data: App.toggleProperty(data, id, 'editing'),
-    }))
-  }
-
-  addTask = (taskName, timer) => {
-    this.setState(({ data }) => {
-      const newArr = [...data]
-
-      newArr.push(App.createNewTask(taskName, timer))
-
-      return {
-        data: newArr,
-      }
-    })
-  }
-
-  deleteTask = (id) => {
-    this.setState(({ data }) => {
-      const newArr = data.filter((el) => {
-        if (el.id !== id) {
-          return true
-        }
-
-        clearInterval(el.timerId)
-        return false
-      })
-
-      return {
-        data: newArr,
-      }
-    })
-  }
-
-  changeFilter = ({ target }) => {
-    this.setState({
-      filter: target.value,
-    })
-  }
-
-  clearCompleted = () => {
-    this.setState(({ data }) => {
-      const newArr = data.filter((el) => {
-        if (!el.done) {
-          return true
-        }
-
-        clearInterval(el.timerId)
-        return false
-      })
-
-      return {
-        data: newArr,
-      }
-    })
-  }
-
-  changeText = (id, textTask) => {
-    this.setState(({ data }) => {
-      const { newArr, idx, oldItem } = App.findTask(data, id)
-      const newItem = { ...oldItem, textTask }
-
-      newArr.splice(idx, 1, newItem)
-
-      return {
-        data: newArr,
-      }
-    })
-  }
-
-  cancelEditing() {
-    this.setState(({ data }) => {
-      const newArr = data.map((task) => {
+  function cancelEditing() {
+    setData((dataTask) => {
+      const newArr = dataTask.map((task) => {
         const { editing } = task
 
         if (editing) {
@@ -192,16 +76,95 @@ export default class App extends React.Component {
         return task
       })
 
-      return {
-        data: newArr,
-      }
+      return newArr
     })
   }
 
-  updateTimer(id) {
-    this.setState(({ data }) => {
-      const { newArr, idx, oldItem } = App.findTask(data, id)
+  useEffect(() => {
+    function handleMouseDown({ target }) {
+      if (!target.matches('.edit')) {
+        cancelEditing()
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+  }, [])
+
+  useEffect(() => {
+    function handleKeyDown({ key }) {
+      if (key === 'Escape') {
+        cancelEditing()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+  }, [])
+
+  const togglePropertyDone = (id) => {
+    setData((dataTask) => toggleProperty(dataTask, id, 'done'))
+  }
+
+  const togglePropertyEditing = (id) => {
+    setData((dataTask) => toggleProperty(dataTask, id, 'editing'))
+  }
+
+  const addTask = (taskName, timer) => {
+    setData((dataTask) => {
+      const newArr = [...dataTask]
+
+      newArr.push(createNewTask(taskName, timer))
+
+      return newArr
+    })
+  }
+
+  const deleteTask = (id) => {
+    setData((dataTask) => {
+      const newArr = dataTask.filter((el) => {
+        if (el.id !== id) {
+          return true
+        }
+
+        clearInterval(el.timerId)
+        return false
+      })
+
+      return newArr
+    })
+  }
+
+  const changeFilter = ({ target }) => {
+    setFilter(target.value)
+  }
+
+  const clearCompleted = () => {
+    setData((dataTask) => {
+      const newArr = dataTask.filter((el) => {
+        if (!el.done) {
+          return true
+        }
+
+        clearInterval(el.timerId)
+        return false
+      })
+
+      return newArr
+    })
+  }
+
+  const changeText = (id, textTask) => {
+    setData((dataTask) => {
+      const { newArr, idx, oldItem } = findTask(dataTask, id)
+      const newItem = { ...oldItem, textTask }
+
+      newArr.splice(idx, 1, newItem)
+      return newArr
+    })
+  }
+
+  function updateTimer(id) {
+    setData((dataTask) => {
+      const { newArr, idx, oldItem } = findTask(dataTask, id)
       const { timer, timerId } = oldItem
+
       let newItem
 
       if (timer > 0) {
@@ -212,38 +175,52 @@ export default class App extends React.Component {
       }
 
       newArr.splice(idx, 1, newItem)
-
-      return {
-        data: newArr,
-      }
+      return newArr
     })
   }
 
-  render() {
-    const { data, filter } = this.state
-    const filteredData = App.filteringData(data, filter)
+  const startTimer = (id) => {
+    setData((dataTask) => {
+      const { newArr, idx, oldItem } = findTask(dataTask, id)
 
-    return (
-      <>
-        <Header onAddedTask={this.addTask} />
-        <section className="main">
-          <TaskList
-            data={filteredData}
-            onDone={this.togglePropertyDone}
-            onEdit={this.togglePropertyEditing}
-            onDelete={this.deleteTask}
-            onChangeText={this.changeText}
-            onStartTimer={this.startTimer}
-            onPauseTimer={this.pauseTimer}
-          />
-          <Footer
-            data={data}
-            filter={filter}
-            onChangeFilter={this.changeFilter}
-            onClearCompleted={this.clearCompleted}
-          />
-        </section>
-      </>
-    )
+      const timerId = setInterval(() => {
+        updateTimer(id)
+      }, 1000)
+
+      const newItem = { ...oldItem, timerRun: true, timerId }
+      newArr.splice(idx, 1, newItem)
+      return newArr
+    })
   }
+
+  const pauseTimer = (id) => {
+    setData((dataTask) => {
+      const { newArr, idx, oldItem } = findTask(dataTask, id)
+      const newItem = { ...oldItem, timerRun: false }
+
+      clearInterval(oldItem.timerId)
+      newArr.splice(idx, 1, newItem)
+      return newArr
+    })
+  }
+
+  const filteredData = filteringData(data, filter)
+
+  return (
+    <>
+      <Header onAddedTask={addTask} />
+      <section className="main">
+        <TaskList
+          data={filteredData}
+          onDone={togglePropertyDone}
+          onEdit={togglePropertyEditing}
+          onDelete={deleteTask}
+          onChangeText={changeText}
+          onStartTimer={startTimer}
+          onPauseTimer={pauseTimer}
+        />
+        <Footer data={data} filter={filter} onChangeFilter={changeFilter} onClearCompleted={clearCompleted} />
+      </section>
+    </>
+  )
 }
